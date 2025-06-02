@@ -1,4 +1,5 @@
 ﻿using LanchesMAC.Context;
+using LanchesMAC.Models;
 using LanchesMAC.Repositories;
 using LanchesMAC.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -22,8 +23,13 @@ namespace LanchesMAC
 
             services.AddTransient<ILancheRepository, LancheRepository>();
             services.AddTransient<ICategoriaRepository, CategoriaRepository>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped(sp => CarrinhoCompra.GetCarrinho(sp));
 
             services.AddControllersWithViews();
+
+            services.AddMemoryCache();
+            services.AddSession();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,14 +49,20 @@ namespace LanchesMAC
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseSession();
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                   name: "categoriaFiltro",
+                   pattern: "Lanche/{action}/{categoria?}",
+                   defaults: new { controller = "Lanche", Action = "List" });
+
+                endpoints.MapControllerRoute(
+                     name: "default",
+                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }
