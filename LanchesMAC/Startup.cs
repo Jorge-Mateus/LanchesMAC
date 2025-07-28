@@ -5,6 +5,8 @@ using LanchesMAC.Repositories.Interface;
 using LanchesMAC.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using ReflectionIT.Mvc.Paging;
 
 namespace LanchesMAC
 {
@@ -55,6 +57,11 @@ namespace LanchesMAC
              });
             services.AddControllersWithViews();
 
+            services.AddPaging(options =>
+            {
+                options.ViewName = "Bootstrap4";
+                options.PageParameterName = "pageindex";
+            });
             services.AddMemoryCache();
             services.AddSession();
         }
