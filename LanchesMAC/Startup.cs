@@ -2,6 +2,7 @@
 using LanchesMAC.Models;
 using LanchesMAC.Repositories;
 using LanchesMAC.Repositories.Interface;
+using LanchesMAC.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,16 +27,16 @@ namespace LanchesMAC
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.Configure<IdentityOptions>(options =>
-            {
-                // Default Password settings.
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
-            });
+            /* services.Configure<IdentityOptions>(options =>
+             {
+                 // Default Password settings.
+                 options.Password.RequireDigit = false;
+                 options.Password.RequireLowercase = false;
+                 options.Password.RequireNonAlphanumeric = false;
+                 options.Password.RequireUppercase = false;
+                 options.Password.RequiredLength = 6;
+                 options.Password.RequiredUniqueChars = 1;
+             });*/
 
             services.AddTransient<ILancheRepository, LancheRepository>();
             services.AddTransient<ICategoriaRepository, CategoriaRepository>();
@@ -43,6 +44,15 @@ namespace LanchesMAC
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped(sp => CarrinhoCompra.GetCarrinho(sp));
 
+            services.AddScoped<ISeedUserRoleInitial, SeedUserRoleInitial>();
+
+            services.AddAuthorization(options =>
+             {
+                 options.AddPolicy("Admin", politica =>
+                 {
+                     politica.RequireRole("Admin");
+                 });
+             });
             services.AddControllersWithViews();
 
             services.AddMemoryCache();
@@ -50,7 +60,7 @@ namespace LanchesMAC
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISeedUserRoleInitial seedUserRoleInitial)
         {
             if (env.IsDevelopment())
             {
@@ -66,6 +76,11 @@ namespace LanchesMAC
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            //criar perfil primeiro
+            seedUserRoleInitial.SeedRoles();
+            //criar perfil
+            seedUserRoleInitial.SeedUsers();
             app.UseSession();
 
             app.UseAuthentication();
@@ -76,7 +91,7 @@ namespace LanchesMAC
 
                 endpoints.MapControllerRoute(
                   name: "areas",
-                  pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+                  pattern: "{area:exists}/{controller=Admin}/{action=Index}/{id?}"
                 );
 
 
