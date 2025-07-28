@@ -1,4 +1,5 @@
-﻿using LanchesMAC.Context;
+﻿using LanchesMAC.Areas.Admin.Services;
+using LanchesMAC.Context;
 using LanchesMAC.Models;
 using LanchesMAC.Repositories;
 using LanchesMAC.Repositories.Interface;
@@ -45,6 +46,7 @@ namespace LanchesMAC
             services.AddTransient<IPedidoRepository, PedidoRepository>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped(sp => CarrinhoCompra.GetCarrinho(sp));
+            services.AddScoped<RelatorioVendasService>();
 
             services.AddScoped<ISeedUserRoleInitial, SeedUserRoleInitial>();
 
